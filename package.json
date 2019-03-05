@@ -1,0 +1,12 @@
+{
+  "name": "carmi-playground",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "./build.sh > carmiShit.js"
+  },
+  "dependencies": {
+    "carmi": "^1.0.188"
+  }
+}
