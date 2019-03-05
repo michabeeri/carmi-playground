@@ -1,4 +1,4 @@
-const {and, or, root, arg0, setter} = require('/Users/davidsu/projects/carmi');
+const {and, or, root, arg0, setter} = require('carmi');
 const todos = root.get('todos');
 const pendingTodos = todos.filterBy(val => val.get('done').not());
 const blockedBy = todos.mapValues(val => val.get('blockedBy'));

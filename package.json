@@ -4,9 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "./build.sh > carmiShit.js"
+    "build": "node node_modules/carmi/bin/carmi --no-cache --debug --format iife --source carmiShit.carmi.js > carmiShit.js"
   },
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.3.4",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/preset-env": "^7.3.4",
+    "@babel/preset-react": "^7.0.0",
     "carmi": "^1.0.188"
   }
 }
