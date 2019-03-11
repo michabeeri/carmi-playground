@@ -39,144 +39,7 @@ var model = (function () {
     throw new TypeError(`${functionName} expects ${types.join('/')}. ${name} at ${source}: ${asString}.${functionName}`)
   }
 
-  // ---------------------------------------- carmi debug api ----------
-  const history = []
-  let latestSnapshot = null
-  const irrelevant = ["$startBatch", "$endBatch", "$runInBatch", "$addListener", "$removeListener", "$setBatchingStrategy", "$ast", "$source", "$model", "debugApi"]
-  function snapshot() {
-      const snap = {
-          model: _.cloneDeep($res.$model),
-          topLevel: _($res).omit(irrelevant).omitBy(_.isFunction).cloneDeep()
-      }
-      return _.assign(..._.values(snap))
-  }
-
-  function objCompare(o1, o2) {
-      return JSON.stringify(o1) === JSON.stringify(o2)
-  }
-
-  function snapshotDiff(current, next) {
-      if (!current) {
-          return _.clone(next)
-      }
-
-      const addedOrChanged =_.reduce(next, (res, val, key) => objCompare(current[key], next[key]) ? res : _.assign(res, {[key]: val}), {})
-      const removed = _(current).keys().difference(_.keys(next)).zipObject().value()
-      return _.assign({}, addedOrChanged, removed)
-  }
-
-  function updateHistory() {
-      const snap = snapshot()
-      console.log(snap)
-      const diff = snapshotDiff(latestSnapshot, snap)
-      console.log(diff)
-      latestSnapshot = snap
-      history.push(diff)
-  }
-
-  function getAncestors(getterName){
-      function _getAncestors(v){
-          if (v && v.constructor && v.constructor.name === 'Array') {
-              if (v[0] === '*get*' && v[2] === '*topLevel*' && carmiInstance[v[1]]) {
-                  return _([v[1]]).concat(getAncestors(v[1])).compact().uniq().value()
-              }
-              else if (v[0] === '*get*' && v[2] === '*root*' && carmiInstance.$model[v[1]]) {
-                  return [v[1]]
-              } else {
-                  return _(v).flatMap(_getAncestors).compact().uniq().value()
-              }
-          }
-          return []
-      }
-
-      return _getAncestors(carmiInstance.$ast()[getterName])
-  }
-
-  function getrelevantHistoryIndexes(getterName){
-      const ancestors = getAncestors(carmiInstance.$ast()[getterName])
-      return _(ancestors)
-          .flatMap(ancestorName => _.reduce(history, (res, diff, idx) => _.has(diff, ancestorName) ? _.concat(res, idx) : res, []))
-          .uniq()
-          .value()
-          .sort((a, b) => a - b)
-  }
-
-  function getHistoricSnapshot(index) {
-      return _.assign({}, ...history.slice(0, index + 1))
-  }
-
-  function getHistoryItem(index) {
-      return _.clone(history[index])
-  }
-
-  function getHistoricAst(getterName, historyIndex) {
-      const fullSnapshot = getHistoricSnapshot(historyIndex)
-      const latestDiff = getHistoryItem(historyIndex)
-      function getFriendlyAst(nodeName) {
-          function getOtherValues(v) {
-              if (v && v.constructor && v.constructor.name === 'Array') {
-                  if (v[0] === '*get*' && v[2] === '*topLevel*' && carmiInstance[v[1]]) {
-                      return [v[1]]
-                  }
-                  else if (v[0] === '*get*' && v[2] === '*root*' && carmiInstance.$model[v[1]]) {
-                      return [v[1]]
-                  } else {
-                      return _(v).flatMap(getOtherValues).compact().uniq().value()
-                  }
-              }
-              return []
-          }
-          const node = carmiInstance.$ast()[nodeName]
-          const ast = {
-              mainValueName: nodeName,
-              value: fullSnapshot[nodeName],
-              updated: !!latestDiff[nodeName]
-          }
-          if (node) {
-              _.assign(ast, {
-                  operation: node[0],
-                  mainValue: getFriendlyAst(node[2][1]),
-                  otherValues: _.map(getOtherValues(node[1]), getFriendlyAst)
-              })
-          }
-          return ast
-      }
-      return getFriendlyAst(getterName)
-  }
-
-  function printSimpleHistoryAst(getter, index) {
-      function createSimpleAst(node) {
-          return _.concat(node.mainValue ? createSimpleAst(node.mainValue) : [], {
-              name: node.operation || node.mainValueName,
-              value: node.value,
-              updated: node.updated
-          })
-      }
-      const node = getHistoricAst(getter, index)
-      const simpleAst = createSimpleAst(node)
-      _.forEach(simpleAst, simpleNode => {
-          console.log(`%c${simpleNode.name} => %c${JSON.stringify(simpleNode.value)}`, simpleNode.updated ? 'color:#ff6347;' : 'color:black;', 'color:black;')
-      })
-  }
-
-  const debugApi = {
-      history,
-      snapshot,
-      snapshotDiff,
-      updateHistory,
-      getAncestors,
-      getrelevantHistoryIndexes,
-      getHistoricSnapshot,
-      getHistoryItem,
-      getHistoricAst,
-      printSimpleHistoryAst
-  }
-  // ---------------------------------------- carmi debug api ----------
-
-  const $res = {
-      $model,
-      debugApi
-    };
+  const $res = { $model };
     const $listeners = new Set();
     const $trackingMap = new WeakMap();
     const $trackingWildcards = new WeakMap();
@@ -1134,8 +997,8 @@ var model = (function () {
       invalidatePath(pathWithKey)
       arr.splice(key, len, ...newItems)
     }
-
-
+  
+    
     const $topLevel = new Array(9).fill(null);
     function isBlocked$0($tracked, key, val, context) {
     let $cond_2 = 0;
@@ -1145,7 +1008,7 @@ var model = (function () {
   }
 
 function $isBlockedBuild($tracked) {
-
+    
     checkTypes($topLevel[0 /*"$mapValues_carmiShit_4_25_1"*/], 'isBlocked', ["object"], 'mapValues', 'carmiShit.carmi.js:16:29')
     const newValue = mapValuesOpt($tracked, '58', isBlocked$0, $topLevel[0 /*"$mapValues_carmiShit_4_25_1"*/], null, true);
      trackPath($tracked, [$topLevel,0]);
@@ -1160,7 +1023,7 @@ function isBlocked2$8($tracked, key, val, context) {
   }
 
 function $isBlocked2Build($tracked) {
-
+    
     checkTypes($topLevel[0 /*"$mapValues_carmiShit_4_25_1"*/], 'isBlocked2', ["object"], 'mapValues', 'carmiShit.carmi.js:17:30')
     const newValue = mapValuesOpt($tracked, '8', isBlocked2$8, $topLevel[0 /*"$mapValues_carmiShit_4_25_1"*/], null, true);
      trackPath($tracked, [$topLevel,0]);
@@ -1168,14 +1031,14 @@ function $isBlocked2Build($tracked) {
   }
 
 function isBlocked35($tracked, key, val, context) {
-
+    
     const res = $topLevel[4 /*"pendingTodos"*/][val];
      trackPath($tracked, [$topLevel[4 /*"pendingTodos"*/],val]);
     return res;
   }
 
 function $isBlocked3Build($tracked) {
-
+    
     checkTypes($topLevel[0 /*"$mapValues_carmiShit_4_25_1"*/], 'isBlocked3', ["object"], 'mapValues', 'carmiShit.carmi.js:18:30')
     const newValue = mapValuesOpt($tracked, '15', isBlocked35, $topLevel[0 /*"$mapValues_carmiShit_4_25_1"*/], null, true);
      trackPath($tracked, [$topLevel,0]);
@@ -1190,7 +1053,7 @@ function canBeWorkedOn$20($tracked, key, val, context) {
   }
 
 function $canBeWorkedOnBuild($tracked) {
-
+    
     checkTypes($model["todos"], 'canBeWorkedOn', ["object"], 'mapValues', 'carmiShit.carmi.js:21:29')
     const newValue = mapValuesOpt($tracked, '20', canBeWorkedOn$20, $model["todos"], null, true);
      trackPath($tracked, [$model,"todos"]);
@@ -1199,7 +1062,7 @@ function $canBeWorkedOnBuild($tracked) {
 
 function $shownTodoBuild($tracked) {
     let $cond_32 = 0;let $cond_33 = 0;
-
+    
     const newValue = ((($cond_32 = 1) && ((($cond_33 = 1) && $model["showCompleted"])&&(($cond_33 = 2) && $topLevel[6 /*"canBeWorkedOn"*/])))||(($cond_32 = 2) && $topLevel[4 /*"pendingTodos"*/]));
     (($cond_32) >= (2) ) &&  trackPath($tracked, [$topLevel,4]);
 (($cond_33) >= (2) ) &&  trackPath($tracked, [$topLevel,6]);
@@ -1208,14 +1071,14 @@ function $shownTodoBuild($tracked) {
   }
 
 function pendingTodos$37($tracked, key, val, context) {
-
+    
     const res = !(val["done"]);
-
+    
     return res;
   }
 
 function $pendingTodosBuild($tracked) {
-
+    
     checkTypes($model["todos"], 'pendingTodos', ["object"], 'filterBy', 'carmiShit.carmi.js:3:28')
     const newValue = filterByOpt($tracked, '37', pendingTodos$37, $model["todos"], null, true);
      trackPath($tracked, [$model,"todos"]);
@@ -1223,21 +1086,21 @@ function $pendingTodosBuild($tracked) {
   }
 
 function blockedGrouped$42$44($tracked, key, val, context) {
-
+    
     const res = (val["blockedBy"]) === (context[0]);
      trackPath($tracked, [context, 0]);
     return res;
   }
 
 function blockedGrouped$42($tracked, key, val, context) {
-
+    
     const res = filterByOpt($tracked, '44', blockedGrouped$42$44, $model["todos"], array($tracked,[key],'44arr',1,true), true);
      trackPath($tracked, [$model,"todos"]);
     return res;
   }
 
 function $blockedGroupedBuild($tracked) {
-
+    
     checkTypes($topLevel[4 /*"pendingTodos"*/], 'blockedGrouped', ["object"], 'mapValues', 'carmiShit.carmi.js:33:37')
     const newValue = mapValuesOpt($tracked, '42', blockedGrouped$42, $topLevel[4 /*"pendingTodos"*/], null, true);
      trackPath($tracked, [$topLevel,4]);
@@ -1245,14 +1108,14 @@ function $blockedGroupedBuild($tracked) {
   }
 
 function $mapValues_carmiShit_4_25_1$50($tracked, key, val, context) {
-
+    
     const res = val["blockedBy"];
-
+    
     return res;
   }
 
 function $mapValues_carmiShit_4_25_1Build($tracked) {
-
+    
     checkTypes($model["todos"], '$mapValues_carmiShit_4_25_1', ["object"], 'mapValues', 'carmiShit.carmi.js:4:25')
     const newValue = mapValuesOpt($tracked, '50', $mapValues_carmiShit_4_25_1$50, $model["todos"], null, true);
      trackPath($tracked, [$model,"todos"]);
@@ -1260,14 +1123,14 @@ function $mapValues_carmiShit_4_25_1Build($tracked) {
   }
 
 function $mapValues_carmiShit_5_25_2$54($tracked, key, val, context) {
-
+    
     const res = val["done"];
-
+    
     return res;
   }
 
 function $mapValues_carmiShit_5_25_2Build($tracked) {
-
+    
     checkTypes($model["todos"], '$mapValues_carmiShit_5_25_2', ["object"], 'mapValues', 'carmiShit.carmi.js:5:25')
     const newValue = mapValuesOpt($tracked, '54', $mapValues_carmiShit_5_25_2$54, $model["todos"], null, true);
      trackPath($tracked, [$model,"todos"]);
@@ -1289,16 +1152,12 @@ function $mapValues_carmiShit_5_25_2Build($tracked) {
         }
       }
     }
-      // ---------------------------------------- carmi debug api ----------
-      updateHistory()
-      // ---------------------------------------- carmi debug api ----------
   }
 
 
     let $inBatch = false;
     let $batchPending = [];
     let $inRecalculate = false;
-
 
     function recalculate() {
       if ($inBatch) {
@@ -1402,238 +1261,7 @@ $tainted = new WeakSet();
 
     if (/* DEBUG */true) {
       Object.assign($res, {
-          // ---------------------------------------- carmi debug api ----------
-        $ast: () => ({
-            "isBlocked": [
-                "*mapValues*",
-                [
-                    "*func*",
-                    [
-                        "*and*",
-                        "*val*",
-                        [
-                            "*not*",
-                            [
-                                "*get*",
-                                "done",
-                                [
-                                    "*get*",
-                                    "*val*",
-                                    [
-                                        "*get*",
-                                        "todos",
-                                        "*root*"
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    "*get*",
-                    "$mapValues_carmiShit_4_25_1",
-                    "*topLevel*"
-                ]
-            ],
-                "isBlocked2": [
-                "*mapValues*",
-                [
-                    "*func*",
-                    [
-                        "*and*",
-                        "*val*",
-                        [
-                            "*not*",
-                            [
-                                "*get*",
-                                "*val*",
-                                [
-                                    "*get*",
-                                    "$mapValues_carmiShit_5_25_2",
-                                    "*topLevel*"
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    "*get*",
-                    "$mapValues_carmiShit_4_25_1",
-                    "*topLevel*"
-                ]
-            ],
-                "isBlocked3": [
-                "*mapValues*",
-                [
-                    "*func*",
-                    [
-                        "*get*",
-                        "*val*",
-                        [
-                            "*get*",
-                            "pendingTodos",
-                            "*topLevel*"
-                        ]
-                    ]
-                ],
-                [
-                    "*get*",
-                    "$mapValues_carmiShit_4_25_1",
-                    "*topLevel*"
-                ]
-            ],
-                "canBeWorkedOn": [
-                "*mapValues*",
-                [
-                    "*func*",
-                    [
-                        "*and*",
-                        [
-                            "*not*",
-                            [
-                                "*get*",
-                                "done",
-                                "*val*"
-                            ]
-                        ],
-                        [
-                            "*or*",
-                            [
-                                "*not*",
-                                [
-                                    "*get*",
-                                    "blockedBy",
-                                    "*val*"
-                                ]
-                            ],
-                            [
-                                "*get*",
-                                [
-                                    "*get*",
-                                    "blockedBy",
-                                    "*val*"
-                                ],
-                                [
-                                    "*get*",
-                                    "$mapValues_carmiShit_5_25_2",
-                                    "*topLevel*"
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    "*get*",
-                    "todos",
-                    "*root*"
-                ]
-            ],
-                "shownTodo": [
-                "*or*",
-                [
-                    "*and*",
-                    [
-                        "*get*",
-                        "showCompleted",
-                        "*root*"
-                    ],
-                    [
-                        "*get*",
-                        "canBeWorkedOn",
-                        "*topLevel*"
-                    ]
-                ],
-                [
-                    "*get*",
-                    "pendingTodos",
-                    "*topLevel*"
-                ]
-            ],
-                "pendingTodos": [
-                "*filterBy*",
-                [
-                    "*func*",
-                    [
-                        "*not*",
-                        [
-                            "*get*",
-                            "done",
-                            "*val*"
-                        ]
-                    ]
-                ],
-                [
-                    "*get*",
-                    "todos",
-                    "*root*"
-                ]
-            ],
-                "blockedGrouped": [
-                "*mapValues*",
-                [
-                    "*func*",
-                    [
-                        "*filterBy*",
-                        [
-                            "*func*",
-                            [
-                                "*eq*",
-                                [
-                                    "*get*",
-                                    "blockedBy",
-                                    "*val*"
-                                ],
-                                "*context*"
-                            ]
-                        ],
-                        [
-                            "*get*",
-                            "todos",
-                            "*root*"
-                        ],
-                        "*key*"
-                    ]
-                ],
-                [
-                    "*get*",
-                    "pendingTodos",
-                    "*topLevel*"
-                ]
-            ],
-                "$mapValues_carmiShit_4_25_1": [
-                "*mapValues*",
-                [
-                    "*func*",
-                    [
-                        "*get*",
-                        "blockedBy",
-                        "*val*"
-                    ]
-                ],
-                [
-                    "*get*",
-                    "todos",
-                    "*root*"
-                ]
-            ],
-                "$mapValues_carmiShit_5_25_2": [
-                "*mapValues*",
-                [
-                    "*func*",
-                    [
-                        "*get*",
-                        "done",
-                        "*val*"
-                    ]
-                ],
-                [
-                    "*get*",
-                    "todos",
-                    "*root*"
-                ]
-            ]
-        }),
-          // ---------------------------------------- carmi debug api ----------
+        $ast: () => { return  },
         $source: () => null
       })
     }

@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "node node_modules/carmi/bin/carmi --no-cache --ast --debug --format iife --source carmiShit.carmi.js > carmiShit.js"
+    "build": "node node_modules/carmi/bin/carmi --no-cache --debug --format iife --source carmiShit.carmi.js > carmiShit.js",
+    "build:ast": "node node_modules/carmi/bin/carmi --no-cache --ast --debug --format iife --source carmiShit.carmi.js > carmiShit.ast.json"
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.3.4",
