@@ -38,7 +38,7 @@ module.exports =  {
   isBlocked,
   isBlocked2,
   isBlocked3,
-  blockedBy,
+  //blockedBy,
   canBeWorkedOn,
   shownTodo,
   pendingTodos,
